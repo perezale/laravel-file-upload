@@ -14,18 +14,31 @@
                 </label>
             </form>
         </div>
-        <div class="pb-4">
-            <a href="files">
-                <div class="p-2 bg-indigo-500 items-center text-indigo-100 leading-none lg:rounded-full flex lg:inline-flex" role="alert">
-                    <span class="font-semibold mr-2 text-left flex-auto px-2" id="uploadMsg">List files</span>
-                    <svg class="fill-current opacity-75 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M12.95 10.707l.707-.707L8 4.343 6.586 5.757 10.828 10l-4.242 4.243L8 15.657l4.95-4.95z"/></svg>
-                </div>
-            </a>
+        <div class="pb-4 w-1/2 hidden" id="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative hidden" id="errorAlert" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline" id="errorMsg"></span>
+            </div>
+            <div class="bg-teal-100 border border-teal-400 text-teal-700 px-4 py-3 rounded relative hidden" id="uploadAlert role="alert">
+                <strong class="font-bold">Success!</strong>
+                <span class="block sm:inline" id="uploadMsg"></span>
+            </div>
+        </div>
+        <div class="pb-4 ">
+            <button class="bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2 px-4 border-b-4 border-indigo-700 hover:border-indigo-500 rounded">
+                <a href="files">List all files</a>
+            </button>
         </div>
 
     </div>
     <script>
+        let alert = document.getElementById("alert");
+
+        let uploadAlert = document.getElementById("uploadAlert");
         let uploadMsg = document.getElementById("uploadMsg");
+
+        let errorAlert = document.getElementById("errorAlert");
+        let errorMsg = document.getElementById("errorMsg");
 
         // Select your input type file and store it in a variable
         const input = document.getElementById('fileToUpload');
@@ -41,12 +54,22 @@
             }).then(
                 response => response.json() // if the response is a JSON object
             ).then(
-                success => {
+                function(success) {
                     console.log(success)
+                    if(success.code != 200)
+                    {
+                        errorMsg.innerText = success.messages.file.toString();
+                        alert.classList.remove("hidden");
+                        return;
+                    }
                     let link = document.createElement("a");
-                    link.innerText = success.link;
-                    link.href = "/storage/" + success.link;
-                    uploadMsg.innerHTML = "Archivo cargado exitosamente! " + link.outerHTML;
+                    link.classList.add("hover:underline");
+                    link.innerText = 'Open file';
+                    link.href = "/storage/" + success.file;
+                    uploadMsg.innerText = "File uploaded OK! ";
+                    uploadMsg.innerHTML += link.outerHTML;
+                    alert.classList.remove("hidden");
+
                 } // Handle the success response object
             ).catch(
                 error => console.log(error) // Handle the error response object
@@ -55,6 +78,7 @@
 
         // Event handler executed when a file is selected
         const onSelectFile = () => {
+            alert.classList.add("hidden");
             var form_data = new FormData();
             form_data.append('file', input.files[0]);
             upload(form_data);

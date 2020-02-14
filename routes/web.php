@@ -23,6 +23,8 @@ Route::group(['middleware' => ['auth.basic:,username']], function () {
     Route::post('/', 'FileUploadController@store');
 
     Route::get('files', 'FileUploadController@index');
+
+    Route::delete('files/{id}', 'FileUploadController@destroy');
 });
 
 
